@@ -435,7 +435,7 @@
       document.getElementById("s925_10g").innerText = formatINR(silver925_10g);
     }
 
-    async function registerCustomer() {
+    function registerCustomer() {
       const name = document.getElementById("custName").value.trim();
       const phone = document.getElementById("custPhone").value.trim().replace(/\D/g, "");
 
@@ -448,23 +448,19 @@
         return;
       }
 
-      const btn = document.getElementById("regBtn");
-      btn.innerText = "कृपया प्रतीक्षा करें...";
-      btn.disabled = true;
-
-      try {
-        await fetch(GOOGLE_SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: name, phone: phone })
-        });
-      } catch (e) {}
-
+      // 1. Turant save aur Gate band karein (bina network wait kiye)
       localStorage.setItem("hoj_registered", "true");
       localStorage.setItem("hoj_user_name", name);
       localStorage.setItem("hoj_user_phone", phone);
       document.getElementById("regGate").classList.add("hidden");
+
+      // 2. Background mein Google Sheet ko data bhejein
+      fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ name: name, phone: phone })
+      }).catch(() => {});
     }
 
     function getSavedPin() {
@@ -540,10 +536,15 @@
         listEl.innerHTML = data.map(c => {
           const cleanPhone = String(c.phone).replace(/\D/g, "");
           const msg = encodeURIComponent(
-            `नमस्ते ${c.name} जी 🙏\n*Hari ॐ Jewellers (Dehradun)* के आज के ताज़ा रेट:\n` +
-            `✨ 24K Gold: ${document.getElementById("g24_10g").innerText}/10g\n` +
-            `✨ 22K Gold: ${document.getElementById("g22_10g").innerText}/10g\n` +
-            `⚪ Silver 999: ${document.getElementById("s999_kg").innerText}/Kg\n` +
+            `नमस्ते ${c.name} जी 🙏
+*Hari ॐ Jewellers (Dehradun)* के आज के ताज़ा रेट:
+` +
+            `✨ 24K Gold: ${document.getElementById("g24_10g").innerText}/10g
+` +
+            `✨ 22K Gold: ${document.getElementById("g22_10g").innerText}/10g
+` +
+            `⚪ Silver 999: ${document.getElementById("s999_kg").innerText}/Kg
+` +
             `📍 Vani Vihar, Adhoiwala, Dehradun`
           );
           return `
@@ -568,9 +569,11 @@
         alert("पहले Sync दबाकर ग्राहक लिस्ट लोड करें।");
         return;
       }
-      let csv = "Date,Name,Phone\n";
+      let csv = "Date,Name,Phone
+";
       customersData.forEach(c => {
-        csv += `"${c.date}","${c.name}","${c.phone}"\n`;
+        csv += `"${c.date}","${c.name}","${c.phone}"
+`;
       });
       const blob = new Blob([csv], { type: "text/csv" });
       const url = URL.createObjectURL(blob);
@@ -583,14 +586,24 @@
     function buildWhatsAppRateText() {
       const gstText = document.getElementById("gstToggle").checked ? "(3% GST सहित)" : "(बिना GST)";
       return (
-        `✨ *HARI ॐ JEWELLERS* ✨\n` +
-        `📍 Vani Vihar, Adhoiwala, Dehradun\n` +
-        `📅 ${document.getElementById("todayDate").innerText} ${gstText}\n\n` +
-        `🟡 *24K Gold (999):* ${document.getElementById("g24_10g").innerText} /10g\n` +
-        `🟡 *22K Gold (916):* ${document.getElementById("g22_10g").innerText} /10g\n` +
-        `🟡 *18K Gold (750):* ${document.getElementById("g18_10g").innerText} /10g\n` +
-        `🟡 *14K Gold (585):* ${document.getElementById("g14_10g").innerText} /10g\n` +
-        `⚪ *Silver (999):* ${document.getElementById("s999_kg").innerText} /Kg\n\n` +
+        `✨ *HARI ॐ JEWELLERS* ✨
+` +
+        `📍 Vani Vihar, Adhoiwala, Dehradun
+` +
+        `📅 ${document.getElementById("todayDate").innerText} ${gstText}
+
+` +
+        `🟡 *24K Gold (999):* ${document.getElementById("g24_10g").innerText} /10g
+` +
+        `🟡 *22K Gold (916):* ${document.getElementById("g22_10g").innerText} /10g
+` +
+        `🟡 *18K Gold (750):* ${document.getElementById("g18_10g").innerText} /10g
+` +
+        `🟡 *14K Gold (585):* ${document.getElementById("g14_10g").innerText} /10g
+` +
+        `⚪ *Silver (999):* ${document.getElementById("s999_kg").innerText} /Kg
+
+` +
         `लाइव रेट देखने के लिए लिंक खोलें: ${window.location.href}`
       );
     }
@@ -623,3 +636,101 @@
       const text = buildWhatsAppRateText();
       window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
     }
+
+    function generateStoryImage() {
+      const canvas = document.getElementById("storyCanvas");
+      const ctx = canvas.getContext("2d");
+
+      const grad = ctx.createLinearGradient(0, 0, 1080, 1920);
+      grad.addColorStop(0, "#1f0b04");
+      grad.addColorStop(0.5, "#3b1708");
+      grad.addColorStop(1, "#140602");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      ctx.strokeStyle = "#d4af37";
+      ctx.lineWidth = 10;
+      ctx.strokeRect(45, 45, 990, 1830);
+
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = function () {
+        ctx.drawImage(img, 365, 90, 350, 350);
+        drawStoryText(ctx, canvas);
+      };
+      img.onerror = function () {
+        drawStoryText(ctx, canvas);
+      };
+      img.src = LOGO_URL;
+    }
+
+    function drawStoryText(ctx, canvas) {
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#f9e29c";
+      ctx.font = "bold 68px sans-serif";
+      ctx.fillText("HARI ॐ JEWELLERS", 540, 510);
+
+      ctx.fillStyle = "#e5c17b";
+      ctx.font = "34px sans-serif";
+      ctx.fillText("Vani Vihar, Adhoiwala, Dehradun", 540, 565);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 36px sans-serif";
+      const gstLabel = document.getElementById("gstToggle").checked ? " (3% GST सहित)" : "";
+      ctx.fillText(document.getElementById("todayDate").innerText + gstLabel, 540, 640);
+
+      const rows = [
+        { label: "24K GOLD (999) / 10g", val: document.getElementById("g24_10g").innerText },
+        { label: "22K GOLD (916) / 10g", val: document.getElementById("g22_10g").innerText },
+        { label: "18K GOLD (750) / 10g", val: document.getElementById("g18_10g").innerText },
+        { label: "14K GOLD (585) / 10g", val: document.getElementById("g14_10g").innerText },
+        { label: "SILVER (999) / 1 Kg", val: document.getElementById("s999_kg").innerText }
+      ];
+
+      let y = 730;
+      rows.forEach(r => {
+        ctx.fillStyle = "rgba(255, 248, 231, 0.08)";
+        ctx.fillRect(100, y, 880, 155);
+        ctx.strokeStyle = "rgba(212, 175, 55, 0.5)";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(100, y, 880, 155);
+
+        ctx.textAlign = "left";
+        ctx.fillStyle = "#f9e29c";
+        ctx.font = "bold 36px sans-serif";
+        ctx.fillText(r.label, 140, y + 90);
+
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 54px sans-serif";
+        ctx.fillText(r.val, 940, y + 95);
+
+        y += 185;
+      });
+
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#f9e29c";
+      ctx.font = "bold 34px sans-serif";
+      ctx.fillText("शुद्धता ही हमारी पहचान है • पधारने के लिए धन्यवाद", 540, 1760);
+
+      canvas.toBlob(async function (blob) {
+        const file = new File([blob], "Hari_Om_Jewellers_Rate.png", { type: "image/png" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: "Hari ॐ Jewellers Today Rate"
+            });
+            return;
+          } catch (e) {}
+        }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Hari_Om_Jewellers_Story.png";
+        a.click();
+      });
+    }
+  </script>
+</body>
+</html>
