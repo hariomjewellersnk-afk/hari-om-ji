@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Hari ॐ Jewellers - Live Bullion</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Hari ॐ Bullion" />
+  <link rel="apple-touch-icon" href="https://res.cloudinary.com/lv7dccxr/image/upload/f_auto,q_auto/Hari_om_jewellers" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(145deg, #1a0b05 0%, #2d1408 50%, #140803 100%);
+      color: #fdf6e7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      min-height: 100vh;
+    }
+    .gold-card {
+      background: rgba(255, 248, 231, 0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    }
+    .gold-text {
+      background: linear-gradient(to right, #f9e29c, #d4af37, #f3d06b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .gold-btn {
+      background: linear-gradient(135deg, #d4af37 0%, #aa8018 100%);
+      color: #1a0b05;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    input {
+      background: rgba(0, 0, 0, 0.45) !important;
+      border: 1px solid rgba(212, 175, 55, 0.4) !important;
+      color: #fff !important;
+    }
+    input:focus {
+      outline: none;
+      border-color: #f9e29c !important;
+    }
+  </style>
+</head>
+<body class="pb-12">
+
+  <!-- Mandatory Customer Registration Gate -->
+  <div id="regGate" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+    <div class="gold-card w-full max-w-md rounded-3xl p-6 text-center">
+      <img src="https://res.cloudinary.com/lv7dccxr/image/upload/f_auto,q_auto/Hari_om_jewellers" alt="Hari ॐ Jewellers" class="w-28 h-28 mx-auto object-contain mb-3 drop-shadow-lg" />
+      <h1 class="text-2xl font-extrabold gold-text">Hari ॐ Jewellers</h1>
+      <p class="text-xs text-amber-200/80 mb-5">Vani Vihar, Adhoiwala, Dehradun</p>
+      
+      <div class="text-left space-y-3 mb-5">
+        <p class="text-sm text-center text-amber-100 font-medium">आज के लाइव सोने-चांदी के रेट देखने के लिए रजिस्टर करें</p>
+        <div>
+          <label class="text-xs text-amber-300 block mb-1">आपका शुभ नाम (Full Name) *</label>
+          <input id="custName" type="text" placeholder="उदा. राहुल शर्मा" class="w-full px-4 py-3 rounded-xl text-base" />
+        </div>
+        <div>
+          <label class="text-xs text-amber-300 block mb-1">मोबाइल नंबर (WhatsApp Number) *</label>
+          <input id="custPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10 अंकों का मोबाइल नंबर" class="w-full px-4 py-3 rounded-xl text-base" />
+        </div>
+      </div>
+
+      <button type="button" onclick="registerCustomer()" id="regBtn" class="gold-btn w-full py-3.5 rounded-xl text-base shadow-lg active:scale-95 transition">
+        लाइव रेट देखें (View Live Rates)
+      </button>
+
+      <div class="mt-5 pt-4 border-t border-amber-500/20">
+        <button type="button" onclick="openOwnerPinFromGate()" class="text-xs text-amber-400/80 underline cursor-pointer">
+          Owner Login (सिर्फ दुकान मालिक के लिए)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIN Modal -->
+  <div id="pinModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
+    <div class="gold-card w-full max-w-xs rounded-2xl p-6 text-center">
+      <h2 class="text-lg font-bold text-amber-300 mb-2">Owner Admin PIN</h2>
+      <p class="text-xs text-amber-100/70 mb-4">रेट बदलने और ग्राहक लिस्ट देखने के लिए 4-अंकों का PIN डालें</p>
+      <input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="w-full text-center text-2xl tracking-widest py-3 rounded-xl mb-4" />
+      <div class="flex gap-2">
+        <button type="button" onclick="closePinModal()" class="w-1/2 py-2.5 rounded-xl bg-white/10 text-sm cursor-pointer">रद्द करें</button>
+        <button type="button" onclick="verifyPin()" class="w-1/2 py-2.5 rounded-xl gold-btn text-sm">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Header -->
+  <header class="sticky top-0 z-30 bg-[#1a0b05]/90 backdrop-blur-md border-b border-amber-500/25 px-4 py-3">
+    <div class="max-w-lg mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="https://res.cloudinary.com/lv7dccxr/image/upload/f_auto,q_auto/Hari_om_jewellers" alt="Logo" class="w-12 h-12 object-contain" />
+        <div>
+          <h1 class="text-lg font-extrabold gold-text leading-tight">Hari ॐ Jewellers</h1>
+          <p class="text-[11px] text-amber-200/75">Vani Vihar, Adhoiwala, Dehradun</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <button type="button" onclick="fetchLiveComex(true)" id="liveBtn" class="px-2.5 py-2 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-semibold cursor-pointer">
+          📡 Live
+        </button>
+        <button type="button" onclick="toggleAdmin()" id="lockBtn" class="px-2.5 py-2 rounded-xl bg-amber-500/15 border border-amber-400/40 text-amber-300 text-xs font-semibold flex items-center gap-1 cursor-pointer">
+          🔒 Admin
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-lg mx-auto px-4 pt-4 space-y-4">
+
+    <!-- Date & GST Toggle Banner -->
+    <div class="gold-card rounded-2xl p-3.5 flex items-center justify-between">
+      <div>
+        <p class="text-[11px] text-amber-300/80">आज की तारीख • <span id="liveStatus" class="text-emerald-400 font-semibold">Auto Live Ready</span></p>
+        <p id="todayDate" class="text-sm font-bold text-white"></p>
+      </div>
+      <label class="flex items-center gap-2 cursor-pointer bg-black/40 px-3 py-2 rounded-xl border border-amber-500/30">
+        <input type="checkbox" id="gstToggle" checked onchange="calculateRates()" class="w-4 h-4 accent-amber-500" />
+        <span class="text-xs font-semibold text-amber-200">3% GST सहित</span>
+      </label>
+    </div>
+
+    <!-- Live Market Ticker Bar -->
+    <div class="gold-card rounded-2xl px-3.5 py-2.5 flex items-center justify-between text-center">
+      <div>
+        <p class="text-[10px] text-amber-300/80">GOLD COMEX</p>
+        <p id="tickerGold" class="text-xs font-extrabold text-white">$3655.05</p>
+      </div>
+      <div class="h-6 w-[1px] bg-amber-500/25"></div>
+      <div>
+        <p class="text-[10px] text-amber-300/80">SILVER COMEX</p>
+        <p id="tickerSilver" class="text-xs font-extrabold text-white">$43.36</p>
+      </div>
+      <div class="h-6 w-[1px] bg-amber-500/25"></div>
+      <div>
+        <p class="text-[10px] text-amber-300/80">USD / INR</p>
+        <p id="tickerInr" class="text-xs font-extrabold text-emerald-300">₹92.95</p>
+      </div>
+    </div>
+
+    <!-- Owner Admin Panel (Hidden by Default) -->
+    <section id="adminPanel" class="hidden gold-card rounded-2xl p-4 border-2 border-amber-400 space-y-4">
+      <div class="flex items-center justify-between border-b border-amber-500/20 pb-2">
+        <h2 class="text-sm font-bold text-amber-300">⚙️ Owner Control Panel (COMEX + Duty %)</h2>
+        <button type="button" onclick="lockAdmin()" class="text-xs bg-red-500/20 text-red-300 px-2.5 py-1 rounded-lg cursor-pointer">Lock करें</button>
+      </div>
+
+      <div class="flex items-center justify-between bg-black/40 p-2.5 rounded-xl border border-emerald-500/30">
+        <span class="text-xs text-emerald-200">🔄 इंटरनेट से अपने आप लाइव COMEX & USD/INR लाएं</span>
+        <button type="button" onclick="fetchLiveComex(true)" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold cursor-pointer">Refresh Live</button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-[11px] text-amber-200 block mb-1">COMEX Gold ($/oz)</label>
+          <input id="comexGold" type="number" inputmode="decimal" step="0.01" value="3655.05" oninput="calculateRates()" class="w-full px-3 py-2 rounded-xl text-sm font-bold" />
+        </div>
+        <div>
+          <label class="text-[11px] text-amber-200 block mb-1">COMEX Silver ($/oz)</label>
+          <input id="comexSilver" type="number" inputmode="decimal" step="0.01" value="43.36" oninput="calculateRates()" class="w-full px-3 py-2 rounded-xl text-sm font-bold" />
+        </div>
+        <div>
+          <label class="text-[11px] text-amber-200 block mb-1">USD to INR (₹)</label>
+          <input id="usdInr" type="number" inputmode="decimal" step="0.01" value="92.95" oninput="calculateRates()" class="w-full px-3 py-2 rounded-xl text-sm font-bold" />
+        </div>
+        <div>
+          <label class="text-[11px] text-amber-200 block mb-1">Gold Import Duty (%)</label>
+          <input id="goldDutyPct" type="number" inputmode="decimal" step="0.01" value="15.55" oninput="calculateRates()" class="w-full px-3 py-2 rounded-xl text-sm font-bold" />
+        </div>
+        <div>
+          <label class="text-[11px] text-amber-200 block mb-1">Silver Import Duty (%)</label>
+          <input id="silverDutyPct" type="number" inputmode="decimal" step="0.01" value="20.04" oninput="calculateRates()" class="w-full px-3 py-2 rounded-xl text-sm font-bold" />
+        </div>
+        <div>
+          <label class="text-[11px] text-amber-200 block mb-1">Extra Gold Prem (₹/10g)</label>
+          <input id="goldPrem" type="number" inputmode="decimal" value="0" oninput="calculateRates()" class="w-full px-3 py-2 rounded-xl text-sm font-bold" />
+        </div>
+        <div>
+          <label class="text-[11px] text-amber-200 block mb-1">Extra Silver Prem (₹/Kg)</label>
+          <input id="silverPrem" type="number" inputmode="decimal" value="0" oninput="calculateRates()" class="w-full px-3 py-2 rounded-xl text-sm font-bold" />
+        </div>
+        <div>
+          <label class="text-[11px] text-amber-200 block mb-1">नया Admin PIN बदलें</label>
+          <div class="flex gap-1">
+            <input id="newPin" type="text" inputmode="numeric" maxlength="4" placeholder="नया PIN" class="w-full px-2 py-2 rounded-xl text-xs" />
+            <button type="button" onclick="changePin()" class="px-2.5 bg-amber-500 text-black font-bold rounded-xl text-xs cursor-pointer">Set</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Registered Customers List -->
+      <div class="pt-3 border-t border-amber-500/20">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xs font-bold text-amber-300">📋 रजिस्टर्ड ग्राहक (<span id="custCount">0</span>)</h3>
+          <div class="flex gap-1.5">
+            <button type="button" onclick="syncCustomers()" class="text-[11px] bg-blue-500/25 text-blue-200 px-2.5 py-1 rounded-lg border border-blue-400/30 cursor-pointer">🔄 Sync</button>
+            <button type="button" onclick="exportCSV()" class="text-[11px] bg-emerald-500/25 text-emerald-200 px-2.5 py-1 rounded-lg border border-emerald-400/30 cursor-pointer">📥 CSV</button>
+          </div>
+        </div>
+        <div id="customerList" class="max-h-52 overflow-y-auto space-y-2 pr-1 text-xs">
+          <p class="text-amber-200/50 text-center py-3">ग्राहकों की लिस्ट देखने के लिए Sync दबाएं</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gold Rates Display -->
+    <section class="gold-card rounded-2xl p-4 space-y-3">
+      <div class="flex items-center justify-between border-b border-amber-500/20 pb-2">
+        <h2 class="text-base font-bold gold-text">✨ Gold Bullion Rates (सोना)</h2>
+        <span class="text-[11px] text-amber-200/70">प्रति 10 ग्राम / 1 ग्राम</span>
+      </div>
+
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between bg-black/35 p-3 rounded-xl border border-amber-500/20">
+          <div>
+            <p class="font-bold text-amber-300 text-sm">24K Gold (999 शुद्ध)</p>
+            <p class="text-[11px] text-amber-100/60">99.50 BIS: <span id="g995_10g">₹0</span> • 1g: <span id="g24_1g">₹0</span></p>
+          </div>
+          <p id="g24_10g" class="text-xl font-extrabold text-white">₹0</p>
+        </div>
+
+        <div class="flex items-center justify-between bg-black/35 p-3 rounded-xl border border-amber-500/20">
+          <div>
+            <p class="font-bold text-amber-300 text-sm">22K Gold (916 हॉलमार्क)</p>
+            <p class="text-[11px] text-amber-100/60">1 ग्राम: <span id="g22_1g">₹0</span></p>
+          </div>
+          <p id="g22_10g" class="text-xl font-extrabold text-amber-300">₹0</p>
+        </div>
+
+        <div class="flex items-center justify-between bg-black/35 p-3 rounded-xl border border-amber-500/20">
+          <div>
+            <p class="font-bold text-amber-300 text-sm">18K Gold (750)</p>
+            <p class="text-[11px] text-amber-100/60">1 ग्राम: <span id="g18_1g">₹0</span></p>
+          </div>
+          <p id="g18_10g" class="text-lg font-bold text-white">₹0</p>
+        </div>
+
+        <div class="flex items-center justify-between bg-black/35 p-3 rounded-xl border border-amber-500/20">
+          <div>
+            <p class="font-bold text-amber-300 text-sm">14K Gold (585)</p>
+            <p class="text-[11px] text-amber-100/60">1 ग्राम: <span id="g14_1g">₹0</span></p>
+          </div>
+          <p id="g14_10g" class="text-lg font-bold text-white">₹0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Silver Rates Display -->
+    <section class="gold-card rounded-2xl p-4 space-y-3">
+      <div class="flex items-center justify-between border-b border-amber-500/20 pb-2">
+        <h2 class="text-base font-bold text-slate-200">⚪ Silver Rates (चांदी)</h2>
+        <span class="text-[11px] text-amber-200/70">1 Kg / 10 Gram</span>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-black/35 p-3 rounded-xl border border-slate-400/20">
+          <p class="text-xs text-slate-300">Silver 999 (1 Kg)</p>
+          <p id="s999_kg" class="text-lg font-extrabold text-white mt-1">₹0</p>
+        </div>
+        <div class="bg-black/35 p-3 rounded-xl border border-slate-400/20">
+          <p class="text-xs text-slate-300">Silver 925 (10g)</p>
+          <p id="s925_10g" class="text-lg font-extrabold text-white mt-1">₹0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Action Buttons: Story Generator & WhatsApp Share -->
+    <div class="space-y-2.5 pt-1">
+      <button type="button" onclick="generateStoryImage()" class="gold-btn w-full py-3.5 rounded-2xl text-sm shadow-lg flex items-center justify-center gap-2 active:scale-95 transition">
+        📸 Instagram / WhatsApp Story फोटो बनाएं
+      </button>
+      <button type="button" onclick="shareTextWhatsApp()" class="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg flex items-center justify-center gap-2 active:scale-95 transition cursor-pointer">
+        💬 WhatsApp पर रेट मैसेज भेजें
+      </button>
+    </div>
+
+    <!-- Hidden Canvas for Story Image -->
+    <canvas id="storyCanvas" width="1080" height="1920" class="hidden"></canvas>
+
+  </main>
+
+  <script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyI6mL4Bs-R2B5Zo8yDv7BNwGmqnclgIU4mtfhfHetfGel6tap-TtYFOejGhDMPvfvRgg/exec";
+    const LOGO_URL = "https://res.cloudinary.com/lv7dccxr/image/upload/f_auto,q_auto/Hari_om_jewellers";
+    const TROY_OZ = 31.1035;
+
+    let isAdmin = false;
+    let customersData = [];
+
+    window.addEventListener("DOMContentLoaded", function () {
+      const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
+      document.getElementById("todayDate").innerText = new Date().toLocaleDateString("hi-IN", options);
+
+      if (localStorage.getItem("hoj_gold_v3")) document.getElementById("comexGold").value = localStorage.getItem("hoj_gold_v3");
+      if (localStorage.getItem("hoj_silver_v3")) document.getElementById("comexSilver").value = localStorage.getItem("hoj_silver_v3");
+      if (localStorage.getItem("hoj_inr_v3")) document.getElementById("usdInr").value = localStorage.getItem("hoj_inr_v3");
+      if (localStorage.getItem("hoj_gduty_v3")) document.getElementById("goldDutyPct").value = localStorage.getItem("hoj_gduty_v3");
+      if (localStorage.getItem("hoj_sduty_v3")) document.getElementById("silverDutyPct").value = localStorage.getItem("hoj_sduty_v3");
+      if (localStorage.getItem("hoj_gprem_v3")) document.getElementById("goldPrem").value = localStorage.getItem("hoj_gprem_v3");
+      if (localStorage.getItem("hoj_sprem_v3")) document.getElementById("silverPrem").value = localStorage.getItem("hoj_sprem_v3");
+
+      if (localStorage.getItem("hoj_registered") === "true" || localStorage.getItem("hoj_is_owner") === "true") {
+        document.getElementById("regGate").classList.add("hidden");
+      }
+
+      calculateRates();
+      fetchLiveComex(false);
+    });
+
+    // Auto Fetch Live COMEX Gold, Silver & USD/INR from Free Public Endpoints
+    async function fetchLiveComex(manualClick) {
+      const statusEl = document.getElementById("liveStatus");
+      const btnEl = document.getElementById("liveBtn");
+      statusEl.innerText = "Updating Live...";
+      if (btnEl) btnEl.innerText = "⏳...";
+
+      let updated = false;
+
+      // 1. Fetch Live USD to INR
+      try {
+        const fxRes = await fetch("https://open.er-api.com/v6/latest/USD");
+        const fxData = await fxRes.json();
+        if (fxData && fxData.rates && fxData.rates.INR) {
+          document.getElementById("usdInr").value = fxData.rates.INR.toFixed(2);
+          updated = true;
+        }
+      } catch (e) {}
+
+      // 2. Fetch Live XAU (Gold) & XAG (Silver) Spot/COMEX in USD
+      try {
+        const goldRes = await fetch("https://api.gold-api.com/price/XAU");
+        const goldData = await goldRes.json();
+        if (goldData && goldData.price) {
+          document.getElementById("comexGold").value = parseFloat(goldData.price).toFixed(2);
+          updated = true;
+        }
+      } catch (e) {}
+
+      try {
+        const silverRes = await fetch("https://api.gold-api.com/price/XAG");
+        const silverData = await silverRes.json();
+        if (silverData && silverData.price) {
+          document.getElementById("comexSilver").value = parseFloat(silverData.price).toFixed(2);
+          updated = true;
+        }
+      } catch (e) {}
+
+      calculateRates();
+
+      if (btnEl) btnEl.innerText = "📡 Live";
+      if (updated) {
+        const nowTime = new Date().toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' });
+        statusEl.innerText = "Live (" + nowTime + ")";
+        if (manualClick) alert("✅ लाइव COMEX Gold, Silver और USD/INR रेट अपडेट हो गए हैं!");
+      } else {
+        statusEl.innerText = "Saved Rates";
+        if (manualClick) alert("लाइव सर्वर व्यस्त है, वर्तमान सेव किए गए रेट दिखाए जा रहे हैं।");
+      }
+    }
+
+    function formatINR(num) {
+      return "₹" + Math.round(num).toLocaleString("en-IN");
+    }
+
+    function calculateRates() {
+      const goldOz = parseFloat(document.getElementById("comexGold").value) || 0;
+      const silverOz = parseFloat(document.getElementById("comexSilver").value) || 0;
+      const inr = parseFloat(document.getElementById("usdInr").value) || 0;
+      const gDutyPct = parseFloat(document.getElementById("goldDutyPct").value) || 0;
+      const sDutyPct = parseFloat(document.getElementById("silverDutyPct").value) || 0;
+      const gPrem = parseFloat(document.getElementById("goldPrem").value) || 0;
+      const sPrem = parseFloat(document.getElementById("silverPrem").value) || 0;
+      const gst = document.getElementById("gstToggle").checked ? 1.03 : 1.0;
+
+      document.getElementById("tickerGold").innerText = "$" + goldOz.toFixed(2);
+      document.getElementById("tickerSilver").innerText = "$" + silverOz.toFixed(2);
+      document.getElementById("tickerInr").innerText = "₹" + inr.toFixed(2);
+
+      localStorage.setItem("hoj_gold_v3", goldOz);
+      localStorage.setItem("hoj_silver_v3", silverOz);
+      localStorage.setItem("hoj_inr_v3", inr);
+      localStorage.setItem("hoj_gduty_v3", gDutyPct);
+      localStorage.setItem("hoj_sduty_v3", sDutyPct);
+      localStorage.setItem("hoj_gprem_v3", gPrem);
+      localStorage.setItem("hoj_sprem_v3", sPrem);
+
+      const rawGold10g = (goldOz / TROY_OZ) * inr * 10;
+      const base24_10g = ((rawGold10g * (1 + gDutyPct / 100)) + gPrem) * gst;
+      const base995_10g = base24_10g * 0.995;
+      const base22_10g = base24_10g * 0.916;
+      const base18_10g = base24_10g * 0.750;
+      const base14_10g = base24_10g * 0.585;
+
+      const rawSilverKg = (silverOz / TROY_OZ) * inr * 1000;
+      const silverKg = ((rawSilverKg * (1 + sDutyPct / 100)) + sPrem) * gst;
+      const silver925_10g = (silverKg / 100) * 0.925;
+
+      document.getElementById("g24_10g").innerText = formatINR(base24_10g);
+      document.getElementById("g995_10g").innerText = formatINR(base995_10g);
+      document.getElementById("g24_1g").innerText = formatINR(base24_10g / 10);
+
+      document.getElementById("g22_10g").innerText = formatINR(base22_10g);
+      document.getElementById("g22_1g").innerText = formatINR(base22_10g / 10);
+
+      document.getElementById("g18_10g").innerText = formatINR(base18_10g);
+      document.getElementById("g18_1g").innerText = formatINR(base18_10g / 10);
+
+      document.getElementById("g14_10g").innerText = formatINR(base14_10g);
+      document.getElementById("g14_1g").innerText = formatINR(base14_10g / 10);
+
+      document.getElementById("s999_kg").innerText = formatINR(silverKg);
+      document.getElementById("s925_10g").innerText = formatINR(silver925_10g);
+    }
+
+    async function registerCustomer() {
+      const name = document.getElementById("custName").value.trim();
+      const phone = document.getElementById("custPhone").value.trim().replace(/\D/g, "");
+
+      if (name.length < 2) {
+        alert("कृपया अपना सही नाम लिखें।");
+        return;
+      }
+      if (phone.length !== 10) {
+        alert("कृपया 10 अंकों का सही मोबाइल नंबर डालें।");
+        return;
+      }
+
+      const btn = document.getElementById("regBtn");
+      btn.innerText = "कृपया प्रतीक्षा करें...";
+      btn.disabled = true;
+
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: name, phone: phone })
+        });
+      } catch (e) {}
+
+      localStorage.setItem("hoj_registered", "true");
+      localStorage.setItem("hoj_user_name", name);
+      localStorage.setItem("hoj_user_phone", phone);
+      document.getElementById("regGate").classList.add("hidden");
+    }
+
+    function getSavedPin() {
+      return localStorage.getItem("hoj_admin_pin") || "1234";
+    }
+
+    function openOwnerPinFromGate() {
+      document.getElementById("pinModal").classList.remove("hidden");
+      document.getElementById("pinInput").focus();
+    }
+
+    function toggleAdmin() {
+      if (isAdmin) {
+        lockAdmin();
+      } else {
+        document.getElementById("pinModal").classList.remove("hidden");
+        document.getElementById("pinInput").focus();
+      }
+    }
+
+    function closePinModal() {
+      document.getElementById("pinModal").classList.add("hidden");
+      document.getElementById("pinInput").value = "";
+    }
+
+    function verifyPin() {
+      const entered = document.getElementById("pinInput").value;
+      if (entered === getSavedPin()) {
+        isAdmin = true;
+        localStorage.setItem("hoj_is_owner", "true");
+        document.getElementById("regGate").classList.add("hidden");
+        document.getElementById("adminPanel").classList.remove("hidden");
+        document.getElementById("lockBtn").innerText = "🔓 Unlocked";
+        closePinModal();
+        syncCustomers();
+      } else {
+        alert("गलत PIN! कृपया पुनः प्रयास करें।");
+      }
+    }
+
+    function lockAdmin() {
+      isAdmin = false;
+      document.getElementById("adminPanel").classList.add("hidden");
+      document.getElementById("lockBtn").innerText = "🔒 Admin";
+    }
+
+    function changePin() {
+      const np = document.getElementById("newPin").value.trim();
+      if (/^\d{4}$/.test(np)) {
+        localStorage.setItem("hoj_admin_pin", np);
+        document.getElementById("newPin").value = "";
+        alert("नया Admin PIN सफलतापूर्वक सेट हो गया: " + np);
+      } else {
+        alert("कृपया 4 अंकों का नंबर डालें।");
+      }
+    }
+
+    async function syncCustomers() {
+      const listEl = document.getElementById("customerList");
+      listEl.innerHTML = '<p class="text-amber-300 text-center py-3">Google Sheet से डेटा लोड हो रहा है...</p>';
+
+      try {
+        const res = await fetch(GOOGLE_SCRIPT_URL);
+        const data = await res.json();
+        customersData = data;
+        document.getElementById("custCount").innerText = data.length;
+
+        if (!data.length) {
+          listEl.innerHTML = '<p class="text-amber-200/60 text-center py-3">अभी तक कोई ग्राहक रजिस्टर नहीं हुआ है।</p>';
+          return;
+        }
+
+        listEl.innerHTML = data.map(c => {
+          const cleanPhone = String(c.phone).replace(/\D/g, "");
+          const msg = encodeURIComponent(
+            `नमस्ते ${c.name} जी 🙏\n*Hari ॐ Jewellers (Dehradun)* के आज के ताज़ा रेट:\n` +
+            `✨ 24K Gold: ${document.getElementById("g24_10g").innerText}/10g\n` +
+            `✨ 22K Gold: ${document.getElementById("g22_10g").innerText}/10g\n` +
+            `⚪ Silver 999: ${document.getElementById("s999_kg").innerText}/Kg\n` +
+            `📍 Vani Vihar, Adhoiwala, Dehradun`
+          );
+          return `
+            <div class="flex items-center justify-between bg-black/40 p-2.5 rounded-xl border border-amber-500/20">
+              <div>
+                <p class="font-bold text-white">${c.name}</p>
+                <p class="text-[10px] text-amber-200/70">📞 ${cleanPhone} • ${c.date}</p>
+              </div>
+              <a href="https://wa.me/91${cleanPhone}?text=${msg}" target="_blank" class="bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg font-bold text-[11px]">
+                WhatsApp
+              </a>
+            </div>
+          `;
+        }).join("");
+      } catch (err) {
+        listEl.innerHTML = '<p class="text-red-300 text-center py-3">डेटा लोड नहीं हो सका। सुनिश्चित करें कि Apps Script में Access "Anyone" है।</p>';
+      }
+    }
+
+    function exportCSV() {
+      if (!customersData.length) {
+        alert("पहले Sync दबाकर ग्राहक लिस्ट लोड करें।");
+        return;
+      }
+      let csv = "Date,Name,Phone\n";
+      customersData.forEach(c => {
+        csv += `"${c.date}","${c.name}","${c.phone}"\n`;
+      });
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Hari_Om_Jewellers_Customers.csv";
+      a.click();
+    }
+
+    function shareTextWhatsApp() {
+      const gstText = document.getElementById("gstToggle").checked ? "(3% GST सहित)" : "(बिना GST)";
+      const text =
+        `✨ *HARI ॐ JEWELLERS* ✨\n` +
+        `📍 Vani Vihar, Adhoiwala, Dehradun\n` +
+        `📅 ${document.getElementById("todayDate").innerText} ${gstText}\n\n` +
+        `🟡 *24K Gold (999):* ${document.getElementById("g24_10g").innerText} /10g\n` +
+        `🟡 *22K Gold (916):* ${document.getElementById("g22_10g").innerText} /10g\n` +
+        `🟡 *18K Gold (750):* ${document.getElementById("g18_10g").innerText} /10g\n` +
+        `🟡 *14K Gold (585):* ${document.getElementById("g14_10g").innerText} /10g\n` +
+        `⚪ *Silver (999):* ${document.getElementById("s999_kg").innerText} /Kg\n\n` +
+        `लाइव रेट देखने के लिए लिंक खोलें: ${window.location.href}`;
+      window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+    }
+
+    function generateStoryImage() {
+      const canvas = document.getElementById("storyCanvas");
+      const ctx = canvas.getContext("2d");
+
+      const grad = ctx.createLinearGradient(0, 0, 1080, 1920);
+      grad.addColorStop(0, "#1f0b04");
+      grad.addColorStop(0.5, "#3b1708");
+      grad.addColorStop(1, "#140602");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      ctx.strokeStyle = "#d4af37";
+      ctx.lineWidth = 10;
+      ctx.strokeRect(45, 45, 990, 1830);
+
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = function () {
+        ctx.drawImage(img, 365, 90, 350, 350);
+        drawStoryText(ctx, canvas);
+      };
+      img.onerror = function () {
+        drawStoryText(ctx, canvas);
+      };
+      img.src = LOGO_URL;
+    }
+
+    function drawStoryText(ctx, canvas) {
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#f9e29c";
+      ctx.font = "bold 68px sans-serif";
+      ctx.fillText("HARI ॐ JEWELLERS", 540, 510);
+
+      ctx.fillStyle = "#e5c17b";
+      ctx.font = "34px sans-serif";
+      ctx.fillText("Vani Vihar, Adhoiwala, Dehradun", 540, 565);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 36px sans-serif";
+      const gstLabel = document.getElementById("gstToggle").checked ? " (3% GST सहित)" : "";
+      ctx.fillText(document.getElementById("todayDate").innerText + gstLabel, 540, 640);
+
+      const rows = [
+        { label: "24K GOLD (999) / 10g", val: document.getElementById("g24_10g").innerText },
+        { label: "22K GOLD (916) / 10g", val: document.getElementById("g22_10g").innerText },
+        { label: "18K GOLD (750) / 10g", val: document.getElementById("g18_10g").innerText },
+        { label: "14K GOLD (585) / 10g", val: document.getElementById("g14_10g").innerText },
+        { label: "SILVER (999) / 1 Kg", val: document.getElementById("s999_kg").innerText }
+      ];
+
+      let y = 730;
+      rows.forEach(r => {
+        ctx.fillStyle = "rgba(255, 248, 231, 0.08)";
+        ctx.fillRect(100, y, 880, 155);
+        ctx.strokeStyle = "rgba(212, 175, 55, 0.5)";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(100, y, 880, 155);
+
+        ctx.textAlign = "left";
+        ctx.fillStyle = "#f9e29c";
+        ctx.font = "bold 36px sans-serif";
+        ctx.fillText(r.label, 140, y + 90);
+
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 54px sans-serif";
+        ctx.fillText(r.val, 940, y + 95);
+
+        y += 185;
+      });
+
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#f9e29c";
+      ctx.font = "bold 34px sans-serif";
+      ctx.fillText("शुद्धता ही हमारी पहचान है • पधारने के लिए धन्यवाद", 540, 1760);
+
+      canvas.toBlob(async function (blob) {
+        const file = new File([blob], "Hari_Om_Jewellers_Rate.png", { type: "image/png" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: "Hari ॐ Jewellers Today Rate"
+            });
+            return;
+          } catch (e) {}
+        }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Hari_Om_Jewellers_Story.png";
+        a.click();
+      });
+    }
+  </script>
+</body>
+</html>
