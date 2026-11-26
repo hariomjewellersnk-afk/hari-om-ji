@@ -705,13 +705,11 @@
           return;
         }
 
-        // तुरंत गेट बंद करें ताकि यूज़र कभी न अटके
         setStorage("hoj_registered", "true");
         setStorage("hoj_user_name", name);
         setStorage("hoj_user_phone", phone);
         hideGate();
 
-        // बैकग्राउंड में Google Sheet पर भेजें
         fetch(GOOGLE_SCRIPT_URL, {
           method: "POST",
           mode: "no-cors",
@@ -978,7 +976,6 @@
         });
       }
 
-      // Bind events cleanly
       document.getElementById("regBtn").addEventListener("click", registerCustomer);
       document.getElementById("ownerGateBtn").addEventListener("click", showPinModal);
       document.getElementById("cancelPinBtn").addEventListener("click", hidePinModal);
@@ -1016,7 +1013,6 @@
         document.getElementById(id).addEventListener("input", calculateRates);
       });
 
-      // Init values
       const options = { weekday: "short", day: "2-digit", month: "short", year: "numeric" };
       document.getElementById("todayDate").innerText = new Date().toLocaleDateString("hi-IN", options);
 
