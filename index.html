@@ -65,7 +65,6 @@
       border-color: #f9e29c;
     }
 
-    /* Registration Gate */
     #regGate {
       position: fixed;
       inset: 0;
@@ -121,7 +120,6 @@
       cursor: pointer;
     }
 
-    /* PIN Modal */
     #pinModal {
       position: fixed;
       inset: 0;
@@ -166,7 +164,6 @@
       font-size: 13px;
     }
 
-    /* Header & Layout */
     header {
       position: sticky;
       top: 0;
@@ -309,7 +306,6 @@
 </head>
 <body>
 
-  <!-- Mandatory Customer Registration Gate -->
   <div id="regGate">
     <div class="gold-card gate-box">
       <img src="https://res.cloudinary.com/lv7dccxr/image/upload/f_auto,q_auto/Hari_om_jewellers" alt="Hari ॐ Jewellers" class="gate-logo" />
@@ -340,7 +336,6 @@
     </div>
   </div>
 
-  <!-- PIN Modal -->
   <div id="pinModal" class="hidden">
     <div class="gold-card pin-box">
       <h2 style="font-size: 17px; font-weight: 700; color: #fcd34d; margin-bottom: 6px;">Owner Admin PIN</h2>
@@ -353,7 +348,6 @@
     </div>
   </div>
 
-  <!-- Main Header -->
   <header>
     <div class="header-inner">
       <div class="brand-wrap">
@@ -371,7 +365,6 @@
   </header>
 
   <main>
-    <!-- Date & GST Toggle Banner -->
     <div class="gold-card banner-row">
       <div>
         <p style="font-size: 11px; color: rgba(252, 211, 77, 0.85);">आज की तारीख • <span id="liveStatus" style="color: #34d399; font-weight: 600;">Auto Live Ready</span></p>
@@ -383,7 +376,6 @@
       </label>
     </div>
 
-    <!-- Live Market Ticker Bar -->
     <div class="gold-card ticker-row">
       <div class="ticker-col">
         <p style="font-size: 10px; color: rgba(252, 211, 77, 0.85);">GOLD COMEX</p>
@@ -401,7 +393,6 @@
       </div>
     </div>
 
-    <!-- Owner Admin Panel -->
     <section id="adminPanel" class="hidden gold-card" style="border: 2px solid #fbbf24;">
       <div class="banner-row" style="border-bottom: 1px solid rgba(245, 158, 11, 0.2); padding-bottom: 8px; margin-bottom: 12px;">
         <h2 style="font-size: 14px; font-weight: 700; color: #fcd34d;">⚙️ Owner Control Panel</h2>
@@ -465,7 +456,6 @@
       </div>
     </section>
 
-    <!-- Gold Rates Display -->
     <section class="gold-card">
       <div class="banner-row" style="border-bottom: 1px solid rgba(245, 158, 11, 0.2); padding-bottom: 8px;">
         <h2 class="gold-text" style="font-size: 16px; font-weight: 700;">✨ Gold Bullion Rates (सोना)</h2>
@@ -505,7 +495,6 @@
       </div>
     </section>
 
-    <!-- Silver Rates Display -->
     <section class="gold-card">
       <div class="banner-row" style="border-bottom: 1px solid rgba(245, 158, 11, 0.2); padding-bottom: 8px; margin-bottom: 10px;">
         <h2 style="font-size: 16px; font-weight: 700; color: #e2e8f0;">⚪ Silver Rates (चांदी)</h2>
@@ -523,7 +512,6 @@
       </div>
     </section>
 
-    <!-- Action Buttons -->
     <div>
       <button type="button" id="storyBtn" class="gold-btn action-btn">
         📸 Instagram / WhatsApp Story फोटो बनाएं
@@ -1019,18 +1007,4 @@
       if (getStorage("hoj_gold_v3")) document.getElementById("comexGold").value = getStorage("hoj_gold_v3");
       if (getStorage("hoj_silver_v3")) document.getElementById("comexSilver").value = getStorage("hoj_silver_v3");
       if (getStorage("hoj_inr_v3")) document.getElementById("usdInr").value = getStorage("hoj_inr_v3");
-      if (getStorage("hoj_gduty_v3")) document.getElementById("goldDutyPct").value = getStorage("hoj_gduty_v3");
-      if (getStorage("hoj_sduty_v3")) document.getElementById("silverDutyPct").value = getStorage("hoj_sduty_v3");
-      if (getStorage("hoj_gprem_v3")) document.getElementById("goldPrem").value = getStorage("hoj_gprem_v3");
-      if (getStorage("hoj_sprem_v3")) document.getElementById("silverPrem").value = getStorage("hoj_sprem_v3");
-
-      if (getStorage("hoj_registered") === "true" || getStorage("hoj_is_owner") === "true") {
-        hideGate();
-      }
-
-      calculateRates();
-      fetchLiveComex(false);
-    })();
-  </script>
-</body>
-</html>
+      if (getStorage("hoj_gduty_v3")) document.getElementById("goldDutyPct").
