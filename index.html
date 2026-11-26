@@ -53,16 +53,16 @@
       <img src="https://res.cloudinary.com/lv7dccxr/image/upload/f_auto,q_auto/Hari_om_jewellers" alt="Hari ॐ Jewellers" class="w-28 h-28 mx-auto object-contain mb-3 drop-shadow-lg" />
       <h1 class="text-2xl font-extrabold gold-text">Hari ॐ Jewellers</h1>
       <p class="text-xs text-amber-200/80 mb-5">Vani Vihar, Adhoiwala, Dehradun</p>
-      
+
       <div class="text-left space-y-3 mb-5">
         <p class="text-sm text-center text-amber-100 font-medium">आज के लाइव सोने-चांदी के रेट देखने के लिए रजिस्टर करें</p>
         <div>
           <label class="text-xs text-amber-300 block mb-1">आपका शुभ नाम (Full Name) *</label>
-          <input id="custName" type="text" placeholder="उदा. राहुल शर्मा" class="w-full px-4 py-3 rounded-xl text-base" />
+          <input id="custName" type="text" placeholder="उदा. राहुल शर्मा" onkeydown="if(event.key==='Enter') document.getElementById('custPhone').focus()" class="w-full px-4 py-3 rounded-xl text-base" />
         </div>
         <div>
           <label class="text-xs text-amber-300 block mb-1">मोबाइल नंबर (WhatsApp Number) *</label>
-          <input id="custPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10 अंकों का मोबाइल नंबर" onkeydown="if(event.key==='Enter') registerCustomer()" class="w-full px-4 py-3 rounded-xl text-base" />
+          <input id="custPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10 अंकों का मोबाइल नंबर" oninput="this.value = this.value.replace(/\D/g, '').slice(0, 10)" onkeydown="if(event.key==='Enter') registerCustomer()" class="w-full px-4 py-3 rounded-xl text-base" />
         </div>
       </div>
 
@@ -83,7 +83,7 @@
     <div class="gold-card w-full max-w-xs rounded-2xl p-6 text-center">
       <h2 class="text-lg font-bold text-amber-300 mb-2">Owner Admin PIN</h2>
       <p class="text-xs text-amber-100/70 mb-4">रेट बदलने और ग्राहक लिस्ट देखने के लिए 4-अंकों का PIN डालें</p>
-      <input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" onkeydown="if(event.key==='Enter') verifyPin()" class="w-full text-center text-2xl tracking-widest py-3 rounded-xl mb-4" />
+      <input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" oninput="this.value = this.value.replace(/\D/g, '').slice(0, 4)" onkeydown="if(event.key==='Enter') verifyPin()" class="w-full text-center text-2xl tracking-widest py-3 rounded-xl mb-4" />
       <div class="flex gap-2">
         <button type="button" onclick="closePinModal()" class="w-1/2 py-2.5 rounded-xl bg-white/10 text-sm cursor-pointer">रद्द करें</button>
         <button type="button" onclick="verifyPin()" class="w-1/2 py-2.5 rounded-xl gold-btn text-sm">Unlock</button>
@@ -188,7 +188,7 @@
         <div>
           <label class="text-[11px] text-amber-200 block mb-1">नया Admin PIN बदलें</label>
           <div class="flex gap-1">
-            <input id="newPin" type="text" inputmode="numeric" maxlength="4" placeholder="नया PIN" class="w-full px-2 py-2 rounded-xl text-xs" />
+            <input id="newPin" type="text" inputmode="numeric" maxlength="4" placeholder="नया PIN" oninput="this.value = this.value.replace(/\D/g, '').slice(0, 4)" class="w-full px-2 py-2 rounded-xl text-xs" />
             <button type="button" onclick="changePin()" class="px-2.5 bg-amber-500 text-black font-bold rounded-xl text-xs cursor-pointer">Set</button>
           </div>
         </div>
@@ -292,27 +292,33 @@
     let isAdmin = false;
     let customersData = [];
 
+    function unlockGateNow() {
+      const gate = document.getElementById("regGate");
+      if (gate) gate.classList.add("hidden");
+    }
+
     window.addEventListener("DOMContentLoaded", function () {
-      const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
-      document.getElementById("todayDate").innerText = new Date().toLocaleDateString("hi-IN", options);
+      try {
+        const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
+        document.getElementById("todayDate").innerText = new Date().toLocaleDateString("hi-IN", options);
 
-      if (localStorage.getItem("hoj_gold_v3")) document.getElementById("comexGold").value = localStorage.getItem("hoj_gold_v3");
-      if (localStorage.getItem("hoj_silver_v3")) document.getElementById("comexSilver").value = localStorage.getItem("hoj_silver_v3");
-      if (localStorage.getItem("hoj_inr_v3")) document.getElementById("usdInr").value = localStorage.getItem("hoj_inr_v3");
-      if (localStorage.getItem("hoj_gduty_v3")) document.getElementById("goldDutyPct").value = localStorage.getItem("hoj_gduty_v3");
-      if (localStorage.getItem("hoj_sduty_v3")) document.getElementById("silverDutyPct").value = localStorage.getItem("hoj_sduty_v3");
-      if (localStorage.getItem("hoj_gprem_v3")) document.getElementById("goldPrem").value = localStorage.getItem("hoj_gprem_v3");
-      if (localStorage.getItem("hoj_sprem_v3")) document.getElementById("silverPrem").value = localStorage.getItem("hoj_sprem_v3");
+        if (localStorage.getItem("hoj_gold_v3")) document.getElementById("comexGold").value = localStorage.getItem("hoj_gold_v3");
+        if (localStorage.getItem("hoj_silver_v3")) document.getElementById("comexSilver").value = localStorage.getItem("hoj_silver_v3");
+        if (localStorage.getItem("hoj_inr_v3")) document.getElementById("usdInr").value = localStorage.getItem("hoj_inr_v3");
+        if (localStorage.getItem("hoj_gduty_v3")) document.getElementById("goldDutyPct").value = localStorage.getItem("hoj_gduty_v3");
+        if (localStorage.getItem("hoj_sduty_v3")) document.getElementById("silverDutyPct").value = localStorage.getItem("hoj_sduty_v3");
+        if (localStorage.getItem("hoj_gprem_v3")) document.getElementById("goldPrem").value = localStorage.getItem("hoj_gprem_v3");
+        if (localStorage.getItem("hoj_sprem_v3")) document.getElementById("silverPrem").value = localStorage.getItem("hoj_sprem_v3");
 
-      if (localStorage.getItem("hoj_registered") === "true" || localStorage.getItem("hoj_is_owner") === "true") {
-        document.getElementById("regGate").classList.add("hidden");
-      }
+        if (localStorage.getItem("hoj_registered") === "true" || localStorage.getItem("hoj_is_owner") === "true") {
+          unlockGateNow();
+        }
+      } catch (e) {}
 
       calculateRates();
       fetchLiveComex(false);
     });
 
-    // Auto Fetch Live COMEX Gold, Silver & USD/INR from Free Public Endpoints
     async function fetchLiveComex(manualClick) {
       const statusEl = document.getElementById("liveStatus");
       const btnEl = document.getElementById("liveBtn");
@@ -321,7 +327,6 @@
 
       let updated = false;
 
-      // 1. Fetch Live USD to INR
       try {
         const fxRes = await fetch("https://open.er-api.com/v6/latest/USD");
         const fxData = await fxRes.json();
@@ -331,7 +336,6 @@
         }
       } catch (e) {}
 
-      // 2. Fetch Live XAU (Gold) & XAG (Silver) Spot/COMEX in USD
       try {
         const goldRes = await fetch("https://api.gold-api.com/price/XAU");
         const goldData = await goldRes.json();
@@ -381,13 +385,15 @@
       document.getElementById("tickerSilver").innerText = "$" + silverOz.toFixed(2);
       document.getElementById("tickerInr").innerText = "₹" + inr.toFixed(2);
 
-      localStorage.setItem("hoj_gold_v3", goldOz);
-      localStorage.setItem("hoj_silver_v3", silverOz);
-      localStorage.setItem("hoj_inr_v3", inr);
-      localStorage.setItem("hoj_gduty_v3", gDutyPct);
-      localStorage.setItem("hoj_sduty_v3", sDutyPct);
-      localStorage.setItem("hoj_gprem_v3", gPrem);
-      localStorage.setItem("hoj_sprem_v3", sPrem);
+      try {
+        localStorage.setItem("hoj_gold_v3", goldOz);
+        localStorage.setItem("hoj_silver_v3", silverOz);
+        localStorage.setItem("hoj_inr_v3", inr);
+        localStorage.setItem("hoj_gduty_v3", gDutyPct);
+        localStorage.setItem("hoj_sduty_v3", sDutyPct);
+        localStorage.setItem("hoj_gprem_v3", gPrem);
+        localStorage.setItem("hoj_sprem_v3", sPrem);
+      } catch (e) {}
 
       const rawGold10g = (goldOz / TROY_OZ) * inr * 10;
       const base24_10g = ((rawGold10g * (1 + gDutyPct / 100)) + gPrem) * gst;
@@ -455,15 +461,18 @@
       const phone = document.getElementById("custPhone").value.trim().replace(/\D/g, "");
 
       if (name.length < 2) {
-        alert("कृपया अपना सही नाम लिखें।");
+        alert("कृपया अपना सही नाम लिखें (कम से कम 2 अक्षर)।");
+        document.getElementById("custName").focus();
         return;
       }
       if (phone.length !== 10) {
         alert("कृपया 10 अंकों का सही मोबाइल नंबर डालें।");
+        document.getElementById("custPhone").focus();
         return;
       }
 
       const btn = document.getElementById("regBtn");
+      const originalText = btn.innerText;
       btn.innerText = "कृपया प्रतीक्षा करें...";
       btn.disabled = true;
 
@@ -475,16 +484,23 @@
         });
       } catch (e) {}
 
-      localStorage.setItem("hoj_registered", "true");
-      localStorage.setItem("hoj_user_name", name);
-      localStorage.setItem("hoj_user_phone", phone);
-      btn.innerText = "लाइव रेट देखें (View Live Rates)";
+      try {
+        localStorage.setItem("hoj_registered", "true");
+        localStorage.setItem("hoj_user_name", name);
+        localStorage.setItem("hoj_user_phone", phone);
+      } catch (e) {}
+
+      btn.innerText = originalText;
       btn.disabled = false;
-      document.getElementById("regGate").classList.add("hidden");
+      unlockGateNow();
     }
 
     function getSavedPin() {
-      return localStorage.getItem("hoj_admin_pin") || "1234";
+      try {
+        return localStorage.getItem("hoj_admin_pin") || "1234";
+      } catch (e) {
+        return "1234";
+      }
     }
 
     function openOwnerPinFromGate() {
@@ -507,17 +523,20 @@
     }
 
     function verifyPin() {
-      const entered = document.getElementById("pinInput").value;
+      const entered = document.getElementById("pinInput").value.trim();
       if (entered === getSavedPin()) {
         isAdmin = true;
-        localStorage.setItem("hoj_is_owner", "true");
-        document.getElementById("regGate").classList.add("hidden");
+        try {
+          localStorage.setItem("hoj_is_owner", "true");
+        } catch (e) {}
+        unlockGateNow();
         document.getElementById("adminPanel").classList.remove("hidden");
         document.getElementById("lockBtn").innerText = "🔓 Unlocked";
         closePinModal();
         syncCustomers();
       } else {
-        alert("गलत PIN! कृपया पुनः प्रयास करें।");
+        alert("गलत PIN! (डिफ़ॉल्ट PIN: 1234)");
+        document.getElementById("pinInput").select();
       }
     }
 
@@ -530,7 +549,9 @@
     function changePin() {
       const np = document.getElementById("newPin").value.trim();
       if (/^\d{4}$/.test(np)) {
-        localStorage.setItem("hoj_admin_pin", np);
+        try {
+          localStorage.setItem("hoj_admin_pin", np);
+        } catch (e) {}
         document.getElementById("newPin").value = "";
         alert("नया Admin PIN सफलतापूर्वक सेट हो गया: " + np);
       } else {
