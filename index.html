@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-...<div id="status">Data load ho raha hai...</div>
+<div id="status">Data load ho raha hai...</div>
 
 <table border="1" cellpadding="8" cellspacing="0" id="customerTable" style="display:none; width:100%; border-collapse:collapse;">
   <thead>
@@ -15,7 +13,6 @@
 </table>
 
 <script>
-  // Version 14 ka naya Web App URL
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyzHtq_YRFobLLG8gPSNEI_Fejt5LXP7MD2wgXC5u5FidxB-TeDt6_aNWjvAXu8WFoj/exec";
 
   async function loadCustomers() {
@@ -31,8 +28,10 @@
 
       const data = await response.json();
 
-      // Agar backend direct array bhej raha hai to data lo, warna data.data fallback
-      const rows = Array.isArray(data) ? data : (Array.isArray(data.data) ? data.data : []);
+      // Backend { status: 'success', count: 3, customers: [...] } bhej raha hai
+      const rows = Array.isArray(data)
+        ? data
+        : (Array.isArray(data.customers) ? data.customers : (Array.isArray(data.data) ? data.data : []));
 
       tbodyEl.innerHTML = "";
 
@@ -44,11 +43,10 @@
       rows.forEach((item, index) => {
         const tr = document.createElement("tr");
 
-        const name = item.name || item.Name || item.customerName || "";
-        const phone = item.phone || item.Phone || item.mobile || "";
-        const rawDate = item.date || item.Date || "";
+        const name = item.name || item.Name || item.customerName || item.customer_name || "";
+        const phone = item.phone || item.Phone || item.mobile || item.contact || "";
+        const rawDate = item.date || item.Date || item.createdAt || "";
 
-        // ISO date ko readable Indian date mein format karna (agar valid date ho)
         let formattedDate = rawDate;
         if (rawDate) {
           const d = new Date(rawDate);
@@ -78,7 +76,6 @@
     }
   }
 
-  // XSS se bachne ke liye simple escape helper
   function escapeHtml(str) {
     return str
       .replace(/&/g, "&amp;")
