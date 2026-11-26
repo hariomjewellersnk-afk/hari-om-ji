@@ -290,7 +290,7 @@
       <div class="rate-row">
         <div>
           <p style="font-weight: 700; color: #fcd34d; font-size: 14px;">24K Gold (999 शुद्ध)</p>
-          <p style="font-size: 11px; color: rgba(254,243,199,0.65); margin-top: 2px;">99.50 BIS: <span id="g995_10g">₹0</span> • 1g: <span id="g24_1g">₹0</span></p>
+          <p style="font-size: 11px; color: rgba(254,243,199,0.65); margin-top: 2px;">99.50 BIS: <span id="g995_10g_sub">₹0</span> • 1g: <span id="g24_1g">₹0</span></p>
         </div>
         <p id="g24_10g" style="font-size: 20px; font-weight: 800; color: #fff;">₹0</p>
       </div>
@@ -368,7 +368,10 @@
 
       function hideGate() {
         const gate = document.getElementById("regGate");
-        if (gate) gate.classList.add("hidden");
+        if (gate) {
+          gate.classList.add("hidden");
+          gate.style.display = "none";
+        }
       }
 
       function showPinModal() {
@@ -394,7 +397,13 @@
 
       function escapeHtml(value) {
         return String(value ?? "").replace(/[&<>"']/g, function (ch) {
-          return { "&": "&", "<": "<", ">": ">", '"': """, "'": "'" }[ch];
+          return {
+            "&": "&",
+            "<": "<",
+            ">": ">",
+            '"': """,
+            "'": "'"
+          }[ch];
         });
       }
 
@@ -432,7 +441,7 @@
         const silver925_10g = (silverKg / 100) * 0.925;
 
         document.getElementById("g24_10g").innerText = formatINR(base24_10g);
-        document.getElementById("g995_10g").innerText = formatINR(base995_10g);
+        document.getElementById("g995_10g_sub").innerText = formatINR(base995_10g);
         document.getElementById("g24_1g").innerText = formatINR(base24_10g / 10);
 
         document.getElementById("g22_10g").innerText = formatINR(base22_10g);
@@ -517,15 +526,17 @@
         setStorage("hoj_user_phone", phone);
         hideGate();
 
-        fetch(GOOGLE_SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          body: JSON.stringify({
-            name: name,
-            phone: phone,
-            date: new Date().toLocaleString("hi-IN")
-          })
-        }).catch(function () {});
+        try {
+          fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify({
+              name: name,
+              phone: phone,
+              date: new Date().toLocaleString("hi-IN")
+            })
+          }).catch(function () {});
+        } catch (e) {}
       }
 
       function getSavedPin() {
