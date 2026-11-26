@@ -62,7 +62,7 @@
         </div>
         <div>
           <label class="text-xs text-amber-300 block mb-1">मोबाइल नंबर (WhatsApp Number) *</label>
-          <input id="custPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10 अंकों का मोबाइल नंबर" class="w-full px-4 py-3 rounded-xl text-base" />
+          <input id="custPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10 अंकों का मोबाइल नंबर" onkeydown="if(event.key==='Enter') registerCustomer()" class="w-full px-4 py-3 rounded-xl text-base" />
         </div>
       </div>
 
@@ -83,7 +83,7 @@
     <div class="gold-card w-full max-w-xs rounded-2xl p-6 text-center">
       <h2 class="text-lg font-bold text-amber-300 mb-2">Owner Admin PIN</h2>
       <p class="text-xs text-amber-100/70 mb-4">रेट बदलने और ग्राहक लिस्ट देखने के लिए 4-अंकों का PIN डालें</p>
-      <input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="w-full text-center text-2xl tracking-widest py-3 rounded-xl mb-4" />
+      <input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" onkeydown="if(event.key==='Enter') verifyPin()" class="w-full text-center text-2xl tracking-widest py-3 rounded-xl mb-4" />
       <div class="flex gap-2">
         <button type="button" onclick="closePinModal()" class="w-1/2 py-2.5 rounded-xl bg-white/10 text-sm cursor-pointer">रद्द करें</button>
         <button type="button" onclick="verifyPin()" class="w-1/2 py-2.5 rounded-xl gold-btn text-sm">Unlock</button>
@@ -446,6 +446,8 @@
       localStorage.setItem("hoj_registered", "true");
       localStorage.setItem("hoj_user_name", name);
       localStorage.setItem("hoj_user_phone", phone);
+      btn.innerText = "लाइव रेट देखें (View Live Rates)";
+      btn.disabled = false;
       document.getElementById("regGate").classList.add("hidden");
     }
 
@@ -577,10 +579,7 @@
       window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
     }
 
-    function generateStoryImage() {
-      const canvas = document.getElementById("storyCanvas");
-      const ctx = canvas.getContext("2d");
-
+    function paintStoryBackground(ctx) {
       const grad = ctx.createLinearGradient(0, 0, 1080, 1920);
       grad.addColorStop(0, "#1f0b04");
       grad.addColorStop(0.5, "#3b1708");
@@ -591,20 +590,26 @@
       ctx.strokeStyle = "#d4af37";
       ctx.lineWidth = 10;
       ctx.strokeRect(45, 45, 990, 1830);
+    }
+
+    function generateStoryImage() {
+      const canvas = document.getElementById("storyCanvas");
+      const ctx = canvas.getContext("2d");
+      paintStoryBackground(ctx);
 
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.onload = function () {
         ctx.drawImage(img, 365, 90, 350, 350);
-        drawStoryText(ctx, canvas);
+        drawStoryText(ctx, canvas, true);
       };
       img.onerror = function () {
-        drawStoryText(ctx, canvas);
+        drawStoryText(ctx, canvas, false);
       };
       img.src = LOGO_URL;
     }
 
-    function drawStoryText(ctx, canvas) {
+    function drawStoryText(ctx, canvas, hasLogo) {
       ctx.textAlign = "center";
       ctx.fillStyle = "#f9e29c";
       ctx.font = "bold 68px sans-serif";
@@ -653,23 +658,31 @@
       ctx.font = "bold 34px sans-serif";
       ctx.fillText("शुद्धता ही हमारी पहचान है • पधारने के लिए धन्यवाद", 540, 1760);
 
-      canvas.toBlob(async function (blob) {
-        const file = new File([blob], "Hari_Om_Jewellers_Rate.png", { type: "image/png" });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-              title: "Hari ॐ Jewellers Today Rate"
-            });
-            return;
-          } catch (e) {}
+      try {
+        canvas.toBlob(async function (blob) {
+          if (!blob) return;
+          const file = new File([blob], "Hari_Om_Jewellers_Rate.png", { type: "image/png" });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+              await navigator.share({
+                files: [file],
+                title: "Hari ॐ Jewellers Today Rate"
+              });
+              return;
+            } catch (e) {}
+          }
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "Hari_Om_Jewellers_Story.png";
+          a.click();
+        });
+      } catch (err) {
+        if (hasLogo) {
+          paintStoryBackground(ctx);
+          drawStoryText(ctx, canvas, false);
         }
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "Hari_Om_Jewellers_Story.png";
-        a.click();
-      });
+      }
     }
   </script>
 </body>
