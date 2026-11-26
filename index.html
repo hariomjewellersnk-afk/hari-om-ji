@@ -417,6 +417,39 @@
       document.getElementById("s925_10g").innerText = formatINR(silver925_10g);
     }
 
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, ch => ({
+        "&": "&",
+        "<": "<",
+        ">": ">",
+        '"': """,
+        "'": "'"
+      }[ch]));
+    }
+
+    function normalizeCustomerList(payload) {
+      const rawList = Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload?.customers)
+          ? payload.customers
+          : Array.isArray(payload?.data)
+            ? payload.data
+            : Array.isArray(payload?.rows)
+              ? payload.rows
+              : null;
+
+      if (!rawList) return null;
+
+      return rawList
+        .filter(item => item && typeof item === "object")
+        .map(item => ({
+          name: item.name ?? item.Name ?? item.customerName ?? item["नाम"] ?? "",
+          phone: item.phone ?? item.Phone ?? item.mobile ?? item.Mobile ?? item["मोबाइल"] ?? "",
+          date: item.date ?? item.Date ?? item.timestamp ?? item.Timestamp ?? item["दिनांक"] ?? ""
+        }))
+        .filter(c => String(c.name).trim() || String(c.phone).trim());
+    }
+
     async function registerCustomer() {
       const name = document.getElementById("custName").value.trim();
       const phone = document.getElementById("custPhone").value.trim().replace(/\D/g, "");
@@ -438,8 +471,7 @@
         await fetch(GOOGLE_SCRIPT_URL, {
           method: "POST",
           mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: name, phone: phone })
+          body: JSON.stringify({ name: name, phone: phone, date: new Date().toLocaleString("hi-IN") })
         });
       } catch (e) {}
 
@@ -511,20 +543,50 @@
       listEl.innerHTML = '<p class="text-amber-300 text-center py-3">Google Sheet से डेटा लोड हो रहा है...</p>';
 
       try {
-        const res = await fetch(GOOGLE_SCRIPT_URL);
-        const data = await res.json();
-        customersData = data;
-        document.getElementById("custCount").innerText = data.length;
+        const sep = GOOGLE_SCRIPT_URL.includes("?") ? "&" : "?";
+        const res = await fetch(`${GOOGLE_SCRIPT_URL}${sep}_t=${Date.now()}`, {
+          method: "GET",
+          redirect: "follow"
+        });
 
-        if (!data.length) {
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const text = await res.text();
+        let parsed;
+        try {
+          parsed = JSON.parse(text);
+        } catch (parseErr) {
+          if (text.includes("<!DOCTYPE") || text.includes("<html")) {
+            throw new Error("Apps Script ने JSON के बजाय HTML/Login पेज भेजा है (Access 'Anyone' और New Version चेक करें)");
+          }
+          throw new Error("Apps Script से मिला डेटा valid JSON नहीं है");
+        }
+
+        if (parsed && parsed.error) {
+          throw new Error(String(parsed.error));
+        }
+
+        const normalized = normalizeCustomerList(parsed);
+        if (!normalized) {
+          throw new Error("JSON का format अपेक्षित लिस्ट जैसा नहीं है");
+        }
+
+        customersData = normalized;
+        document.getElementById("custCount").innerText = customersData.length;
+
+        if (!customersData.length) {
           listEl.innerHTML = '<p class="text-amber-200/60 text-center py-3">अभी तक कोई ग्राहक रजिस्टर नहीं हुआ है।</p>';
           return;
         }
 
-        listEl.innerHTML = data.map(c => {
+        listEl.innerHTML = customersData.map(c => {
           const cleanPhone = String(c.phone).replace(/\D/g, "");
+          const safeName = escapeHtml(c.name || "ग्राहक");
+          const safeDate = escapeHtml(c.date || "");
           const msg = encodeURIComponent(
-            `नमस्ते ${c.name} जी 🙏\n*Hari ॐ Jewellers (Dehradun)* के आज के ताज़ा रेट:\n` +
+            `नमस्ते ${c.name || "जी"} 🙏\n*Hari ॐ Jewellers (Dehradun)* के आज के ताज़ा रेट:\n` +
             `✨ 24K Gold: ${document.getElementById("g24_10g").innerText}/10g\n` +
             `✨ 22K Gold: ${document.getElementById("g22_10g").innerText}/10g\n` +
             `⚪ Silver 999: ${document.getElementById("s999_kg").innerText}/Kg\n` +
@@ -533,17 +595,24 @@
           return `
             <div class="flex items-center justify-between bg-black/40 p-2.5 rounded-xl border border-amber-500/20">
               <div>
-                <p class="font-bold text-white">${c.name}</p>
-                <p class="text-[10px] text-amber-200/70">📞 ${cleanPhone} • ${c.date}</p>
+                <p class="font-bold text-white">${safeName}</p>
+                <p class="text-[10px] text-amber-200/70">📞 ${escapeHtml(cleanPhone)} • ${safeDate}</p>
               </div>
-              <a href="https://wa.me/91${cleanPhone}?text=${msg}" target="_blank" class="bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg font-bold text-[11px]">
+              <a href="https://wa.me/91${cleanPhone}?text=${msg}" target="_blank" rel="noopener noreferrer" class="bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg font-bold text-[11px]">
                 WhatsApp
               </a>
             </div>
           `;
         }).join("");
       } catch (err) {
-        listEl.innerHTML = '<p class="text-red-300 text-center py-3">डेटा लोड नहीं हो सका। सुनिश्चित करें कि Apps Script में Access "Anyone" है।</p>';
+        console.error("Sync error:", err);
+        const reason = escapeHtml(err && err.message ? err.message : "अज्ञात त्रुटि");
+        listEl.innerHTML = `
+          <div class="text-red-300 text-center py-3 space-y-1">
+            <p class="font-semibold">डेटा लोड नहीं हो सका।</p>
+            <p class="text-[11px] text-red-200/80">${reason}</p>
+          </div>
+        `;
       }
     }
 
@@ -554,14 +623,18 @@
       }
       let csv = "Date,Name,Phone\n";
       customersData.forEach(c => {
-        csv += `"${c.date}","${c.name}","${c.phone}"\n`;
+        const d = String(c.date || "").replace(/"/g, '""');
+        const n = String(c.name || "").replace(/"/g, '""');
+        const p = String(c.phone || "").replace(/"/g, '""');
+        csv += `"${d}","${n}","${p}"\n`;
       });
-      const blob = new Blob([csv], { type: "text/csv" });
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = "Hari_Om_Jewellers_Customers.csv";
       a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
     function shareTextWhatsApp() {
