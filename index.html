@@ -122,6 +122,30 @@
       background: rgba(0, 0, 0, 0.4); padding: 10px; border-radius: 12px;
       border: 1px solid rgba(245, 158, 11, 0.2); margin-top: 8px;
     }
+
+    /* WhatsApp schedule controls */
+    input[type="date"], input[type="time"], select, textarea {
+      width: 100%; background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(212, 175, 55, 0.4); color: #fff;
+      border-radius: 12px; padding: 11px 12px; font-size: 15px;
+    }
+    select option { background: #2d1408; color: #fff; }
+    textarea { min-height: 112px; resize: vertical; line-height: 1.5; }
+    .schedule-note {
+      background: rgba(245, 158, 11, 0.10); border: 1px solid rgba(245, 158, 11, 0.28);
+      color: #fde68a; border-radius: 10px; padding: 10px; font-size: 11px; line-height: 1.55;
+      margin: 8px 0 12px;
+    }
+    .schedule-item {
+      background: rgba(0,0,0,.34); border: 1px solid rgba(245,158,11,.22);
+      border-radius: 12px; padding: 10px; margin-top: 8px;
+    }
+    .schedule-item p { overflow-wrap: anywhere; }
+    .schedule-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .schedule-actions button { border:0; border-radius:9px; padding:9px 11px; font-weight:700; cursor:pointer; }
+    .schedule-open { background:#059669; color:#fff; }
+    .schedule-delete { background:rgba(239,68,68,.2); color:#fecaca; }
+    .schedule-small { color:rgba(253,230,138,.72); font-size:11px; margin-top:4px; }
   </style>
 </head>
 <body>
@@ -276,6 +300,42 @@
         </div>
         <div id="customerList" style="max-height: 210px; overflow-y: auto; font-size: 12px;">
           <p style="color: rgba(253,230,138,0.55); text-align: center; padding: 12px;">ग्राहकों की लिस्ट देखने के लिए Sync दबाएं</p>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(245,158,11,.22); padding-top:12px; margin-top:14px;">
+        <h3 style="font-size:13px; color:#fcd34d; font-weight:800;">⏰ WhatsApp संदेश का समय तय करें</h3>
+        <div class="schedule-note">
+          यह मुफ्त, इसी ब्राउज़र में चलने वाला रिमाइंडर है। तय समय पर वेबसाइट खुली हो तो सूचना मिलेगी। फिर “WhatsApp खोलें” दबाकर WhatsApp में “भेजें” आपको दबाना होगा। वेबसाइट/डिवाइस बंद होने पर उसी समय संदेश नहीं जाएगा।
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="scheduleCustomer">रजिस्टर्ड ग्राहक चुनें (वैकल्पिक)</label>
+          <select id="scheduleCustomer"><option value="">ग्राहक सूची से चुनें…</option></select>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="schedulePhone">WhatsApp मोबाइल नंबर</label>
+          <input id="schedulePhone" type="tel" inputmode="numeric" maxlength="12" placeholder="10 अंकों का मोबाइल नंबर" />
+        </div>
+        <div class="grid-2">
+          <div class="field-group">
+            <label class="field-label" for="scheduleDate">तारीख</label>
+            <input id="scheduleDate" type="date" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="scheduleTime">समय</label>
+            <input id="scheduleTime" type="time" />
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="scheduleMessage">WhatsApp संदेश</label>
+          <textarea id="scheduleMessage" placeholder="अपना संदेश यहाँ लिखें…"></textarea>
+          <button type="button" id="insertRateMessageBtn" class="mini-btn" style="margin-top:7px; background:rgba(16,185,129,.2); color:#a7f3d0; border:1px solid rgba(52,211,153,.35);">आज के सोने-चाँदी के रेट जोड़ें</button>
+        </div>
+        <button type="button" id="scheduleWhatsAppBtn" class="gold-btn" style="width:100%; padding:12px; border-radius:11px;">समय तय करें</button>
+        <button type="button" id="enableScheduleNoticeBtn" class="mini-btn" style="margin-top:8px; background:rgba(59,130,246,.2); color:#bfdbfe; border:1px solid rgba(96,165,250,.35);">इस ब्राउज़र में सूचना चालू करें</button>
+        <p id="scheduleNotice" aria-live="polite" style="font-size:12px; color:#a7f3d0; margin-top:9px;"></p>
+        <div style="margin-top:12px;">
+          <h4 style="font-size:12px; color:#fcd34d;">📅 तय किए गए संदेश</h4>
+          <div id="scheduleList" aria-live="polite"><p class="schedule-small">अभी कोई संदेश तय नहीं है।</p></div>
         </div>
       </div>
     </section>
@@ -624,6 +684,7 @@
 
           customersData = normalized;
           document.getElementById("custCount").innerText = customersData.length;
+          fillScheduleCustomerOptions();
 
           if (!customersData.length) {
             listEl.innerHTML = '<p style="color:rgba(253,230,138,0.65);text-align:center;padding:12px;">अभी तक कोई ग्राहक रजिस्टर नहीं हुआ है।</p>';
@@ -682,10 +743,9 @@
         setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
       }
 
-      function shareTextWhatsApp() {
+      function getRateWhatsAppMessage() {
         const gstText = document.getElementById("gstToggle").checked ? "(3% GST सहित)" : "(बिना GST)";
-        const text =
-          "✨ *HARI ॐ JEWELLERS* ✨\n" +
+        return "✨ *HARI ॐ JEWELLERS* ✨\n" +
           "📍 Vani Vihar, Adhoiwala, Dehradun\n" +
           "📅 " + document.getElementById("todayDate").innerText + " " + gstText + "\n\n" +
           "🟡 *24K Gold (999):* " + document.getElementById("g24_10g").innerText + " /10g\n" +
@@ -694,6 +754,187 @@
           "🟡 *14K Gold (585):* " + document.getElementById("g14_10g").innerText + " /10g\n" +
           "⚪ *Silver (999):* " + document.getElementById("s999_kg").innerText + " /Kg\n\n" +
           "लाइव रेट देखने के लिए लिंक खोलें: " + window.location.href;
+      }
+
+      function readWhatsAppSchedules() {
+        try {
+          const parsed = JSON.parse(getStorage("hoj_wa_schedules_v1") || "[]");
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (e) { return []; }
+      }
+
+      function writeWhatsAppSchedules(items) {
+        setStorage("hoj_wa_schedules_v1", JSON.stringify(items));
+        renderWhatsAppSchedules();
+      }
+
+      function localDateValue(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return y + "-" + m + "-" + d;
+      }
+
+      function setScheduleDefaultDateTime() {
+        const dateInput = document.getElementById("scheduleDate");
+        const timeInput = document.getElementById("scheduleTime");
+        if (!dateInput || !timeInput) return;
+        const soon = new Date(Date.now() + 10 * 60 * 1000);
+        dateInput.value = localDateValue(soon);
+        timeInput.value = String(soon.getHours()).padStart(2, "0") + ":" + String(soon.getMinutes()).padStart(2, "0");
+      }
+
+      function fillScheduleCustomerOptions() {
+        const select = document.getElementById("scheduleCustomer");
+        if (!select) return;
+        const current = select.value;
+        select.innerHTML = '<option value="">ग्राहक सूची से चुनें…</option>' + customersData.map(function (c, index) {
+          const name = escapeHtml(c.name || "ग्राहक");
+          const phone = String(c.phone || "").replace(/\D/g, "");
+          return '<option value="' + index + '">' + name + ' — ' + escapeHtml(phone) + '</option>';
+        }).join("");
+        if (current && customersData[Number(current)]) select.value = current;
+      }
+
+      function addWhatsAppSchedule() {
+        const phoneInput = document.getElementById("schedulePhone");
+        let phone = String(phoneInput.value || "").replace(/\D/g, "");
+        if (phone.length === 12 && phone.startsWith("91")) phone = phone.slice(2);
+        if (phone.length === 11 && phone.startsWith("0")) phone = phone.slice(1);
+        const dateValue = document.getElementById("scheduleDate").value;
+        const timeValue = document.getElementById("scheduleTime").value;
+        const message = document.getElementById("scheduleMessage").value.trim();
+        if (!/^\d{10}$/.test(phone)) {
+          alert("कृपया सही 10 अंकों का WhatsApp मोबाइल नंबर डालें।");
+          phoneInput.focus();
+          return;
+        }
+        if (!dateValue || !timeValue) {
+          alert("कृपया संदेश की तारीख और समय चुनें।");
+          return;
+        }
+        const parts = dateValue.split("-").map(Number);
+        const clock = timeValue.split(":").map(Number);
+        const due = new Date(parts[0], parts[1] - 1, parts[2], clock[0], clock[1], 0, 0);
+        if (!Number.isFinite(due.getTime()) || due.getFullYear() !== parts[0] || due.getMonth() !== parts[1] - 1 || due.getDate() !== parts[2]) {
+          alert("तारीख या समय सही नहीं है।");
+          return;
+        }
+        if (due.getTime() <= Date.now()) {
+          alert("कृपया भविष्य की तारीख और समय चुनें।");
+          return;
+        }
+        if (!message) {
+          alert("कृपया WhatsApp संदेश लिखें या आज के रेट जोड़ें।");
+          document.getElementById("scheduleMessage").focus();
+          return;
+        }
+        const items = readWhatsAppSchedules();
+        if (items.length >= 30) {
+          alert("एक साथ अधिकतम 30 संदेश तय किए जा सकते हैं। पहले कुछ पुराने संदेश हटाएँ।");
+          return;
+        }
+        items.push({
+          id: "wa_" + Date.now() + "_" + Math.floor(Math.random() * 100000),
+          phone: phone,
+          message: message,
+          dueAt: due.getTime(),
+          status: "scheduled",
+          createdAt: Date.now()
+        });
+        writeWhatsAppSchedules(items);
+        document.getElementById("scheduleNotice").innerText = "✅ संदेश का समय तय हो गया: " + due.toLocaleString("hi-IN");
+        document.getElementById("scheduleMessage").value = "";
+        document.getElementById("scheduleCustomer").value = "";
+      }
+
+      function renderWhatsAppSchedules() {
+        const list = document.getElementById("scheduleList");
+        if (!list) return;
+        const items = readWhatsAppSchedules().sort(function (a, b) { return a.dueAt - b.dueAt; });
+        if (!items.length) {
+          list.innerHTML = '<p class="schedule-small">अभी कोई संदेश तय नहीं है।</p>';
+          return;
+        }
+        list.innerHTML = items.map(function (item) {
+          const dueText = new Date(item.dueAt).toLocaleString("hi-IN", { dateStyle: "medium", timeStyle: "short" });
+          const statusText = item.status === "due" ? "⏰ समय हो गया — WhatsApp खोलकर भेजें" :
+            item.status === "opened" ? "WhatsApp खुल चुका है — WhatsApp में भेजना अभी बाकी है" : "निर्धारित";
+          const action = item.status === "scheduled" ?
+            '<button type="button" class="schedule-delete" data-schedule-delete="' + escapeHtml(item.id) + '">रद्द करें</button>' :
+            item.status === "due" ?
+            '<button type="button" class="schedule-open" data-schedule-open="' + escapeHtml(item.id) + '">WhatsApp खोलें</button><button type="button" class="schedule-delete" data-schedule-delete="' + escapeHtml(item.id) + '">हटाएँ</button>' :
+            '<button type="button" class="schedule-delete" data-schedule-delete="' + escapeHtml(item.id) + '">हटाएँ</button>';
+          return '<div class="schedule-item">' +
+            '<p style="font-weight:700;color:#fff;font-size:12px;">' + escapeHtml(dueText) + ' • ' + escapeHtml(item.phone) + '</p>' +
+            '<p class="schedule-small">' + statusText + '</p>' +
+            '<p class="schedule-small">' + escapeHtml(item.message.slice(0, 150)) + (item.message.length > 150 ? "…" : "") + '</p>' +
+            '<div class="schedule-actions">' + action + '</div>' +
+          '</div>';
+        }).join("");
+      }
+
+      function checkDueWhatsAppSchedules() {
+        const items = readWhatsAppSchedules();
+        let changed = false;
+        const now = Date.now();
+        items.forEach(function (item) {
+          if (item.status === "scheduled" && Number(item.dueAt) <= now) {
+            item.status = "due";
+            changed = true;
+            const notice = document.getElementById("scheduleNotice");
+            if (notice) notice.innerText = "⏰ आपका तय किया हुआ WhatsApp संदेश तैयार है। नीचे “WhatsApp खोलें” दबाएँ।";
+            if ("Notification" in window && Notification.permission === "granted") {
+              try { new Notification("Hari ॐ Jewellers", { body: "आपका तय WhatsApp संदेश तैयार है। वेबसाइट खोलकर WhatsApp खोलें।" }); } catch (e) {}
+            }
+          }
+        });
+        if (changed) writeWhatsAppSchedules(items);
+        else renderWhatsAppSchedules();
+      }
+
+      function handleWhatsAppScheduleListClick(event) {
+        const openButton = event.target.closest("[data-schedule-open]");
+        const deleteButton = event.target.closest("[data-schedule-delete]");
+        if (openButton) {
+          const id = openButton.getAttribute("data-schedule-open");
+          const items = readWhatsAppSchedules();
+          const item = items.find(function (entry) { return entry.id === id; });
+          if (!item) return;
+          const finalMessage = item.message.replace(/\{\{TODAY_RATES\}\}/g, getRateWhatsAppMessage());
+          const url = "https://wa.me/91" + item.phone + "?text=" + encodeURIComponent(finalMessage);
+          const newWindow = window.open(url, "_blank");
+          if (!newWindow) window.location.href = url;
+          item.status = "opened";
+          item.openedAt = Date.now();
+          writeWhatsAppSchedules(items);
+          const notice = document.getElementById("scheduleNotice");
+          if (notice) notice.innerText = "WhatsApp खोला गया है। संदेश भेजने के लिए WhatsApp में हरा Send बटन दबाएँ।";
+          return;
+        }
+        if (deleteButton) {
+          const id = deleteButton.getAttribute("data-schedule-delete");
+          writeWhatsAppSchedules(readWhatsAppSchedules().filter(function (entry) { return entry.id !== id; }));
+        }
+      }
+
+      async function enableScheduleNotifications() {
+        if (!("Notification" in window)) {
+          alert("इस ब्राउज़र में सूचना सुविधा उपलब्ध नहीं है। वेबसाइट खुली रखने पर समय होने पर सूची में सूचना दिखेगी।");
+          return;
+        }
+        try {
+          const permission = await Notification.requestPermission();
+          document.getElementById("scheduleNotice").innerText = permission === "granted" ?
+            "✅ इस ब्राउज़र की सूचनाएँ चालू हो गईं। तय समय पर वेबसाइट खुली होनी चाहिए।" :
+            "सूचना की अनुमति नहीं मिली। वेबसाइट खुली रखने पर पेज में संदेश तैयार दिखेगा।";
+        } catch (e) {
+          document.getElementById("scheduleNotice").innerText = "सूचना चालू नहीं हो सकी; पेज में समय होने पर सूचना दिखेगी।";
+        }
+      }
+
+      function shareTextWhatsApp() {
+        const text = getRateWhatsAppMessage();
         window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
       }
 
@@ -821,6 +1062,19 @@
       });
       document.getElementById("syncBtn").addEventListener("click", syncCustomers);
       document.getElementById("csvBtn").addEventListener("click", exportCSV);
+      document.getElementById("scheduleWhatsAppBtn").addEventListener("click", addWhatsAppSchedule);
+      document.getElementById("insertRateMessageBtn").addEventListener("click", function () {
+        const box = document.getElementById("scheduleMessage");
+        const marker = "{{TODAY_RATES}}";
+        if (!box.value.includes(marker)) box.value = box.value.trim() + (box.value.trim() ? "\n\n" : "") + marker;
+        document.getElementById("scheduleNotice").innerText = "समय होने पर WhatsApp खोलते समय उस समय के रेट संदेश में जुड़ेंगे।";
+      });
+      document.getElementById("enableScheduleNoticeBtn").addEventListener("click", enableScheduleNotifications);
+      document.getElementById("scheduleCustomer").addEventListener("change", function () {
+        const selected = customersData[Number(this.value)];
+        if (selected) document.getElementById("schedulePhone").value = String(selected.phone || "").replace(/\D/g, "");
+      });
+      document.getElementById("scheduleList").addEventListener("click", handleWhatsAppScheduleListClick);
       document.getElementById("storyBtn").addEventListener("click", generateStoryImage);
       document.getElementById("waShareBtn").addEventListener("click", shareTextWhatsApp);
       document.getElementById("gstToggle").addEventListener("change", calculateRates);
@@ -845,6 +1099,14 @@
       }
 
       calculateRates();
+      setScheduleDefaultDateTime();
+      fillScheduleCustomerOptions();
+      checkDueWhatsAppSchedules();
+      window.setInterval(checkDueWhatsAppSchedules, 10000);
+      document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) checkDueWhatsAppSchedules();
+      });
+      window.addEventListener("pageshow", checkDueWhatsAppSchedules);
       fetchLiveComex(false);
     })();
   </script>
